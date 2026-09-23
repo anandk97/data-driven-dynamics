@@ -1,4 +1,4 @@
-"""Download the five CTF datasets used here from the CTF-for-Science OSF project (osf.io/6rzhm) into ./data."""
+"""Download the six CTF datasets used here from the CTF-for-Science OSF project (osf.io/6rzhm) into ./data."""
 
 import tarfile
 import urllib.request
@@ -11,6 +11,7 @@ FILES = {  # dataset -> OSF file id (see https://api.osf.io/v2/nodes/6rzhm/files
     "seismo": "nrufb",  # 0.2 GB, test set withheld
     "ocean_das": "hc58g",  # 0.2 GB, test set withheld
     "sst": "jzc6t",  # 1.3 GB, test set withheld
+    "msfr": "h5qc2",  # 1.0 GB, CTF4Nuclear molten salt fast reactor, test set withheld
 }
 
 if __name__ == "__main__":

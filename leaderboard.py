@@ -32,22 +32,34 @@ PAPER = {
         "Baseline: zeros": [0.0] * 12,
     },
 }
+PAPER["msfr"] = {  # CTF4Nuclear (arXiv 2605.15549), Table 1, top 7 by average
+    "PyKoopman": [87.46, 31.12, 90.91, 71.81, 86.92, 85.00, 92.72, 61.21, 92.59, 65.95, 43.36, 42.56],
+    "Baseline: last frame": [81.20, 71.79, 25.45, 71.79, -25.46, 71.79, 85.90, 49.52, 85.88, 49.53, 94.03, 90.65],
+    "Reservoir": [92.36, 87.44, 98.85, 88.42, 98.85, 66.02, 92.09, 92.78, -100, -100, 86.08, 83.75],
+    "SINDy": [75.35, 42.89, 41.38, 42.90, 41.47, 42.80, 73.83, 52.89, 73.83, 52.90, 70.06, 55.92],
+    "Opt DMD": [72.13, 41.22, 90.71, 41.25, 91.33, 41.11, 60.87, 50.11, 61.91, 52.27, 36.57, -1.80],
+    "ODE-LSTM": [80.73, 61.42, 5.69, 30.06, 93.01, 52.45, 78.31, 42.27, 34.42, 66.85, 56.52, 30.74],
+    "LSTM": [49.26, 30.35, 97.02, 14.21, 96.39, 12.15, 81.42, 49.22, 58.03, 23.59, 59.12, 30.02],
+}
 OURS = "**Ours: identified model + 4D-Var/EKF**"
+OURS_MSFR = "**Ours: SVHT denoise + persistence (estimated)**"
 
 
 def table(key):
-    res = json.loads((ROOT / "results" / f"{key}.json").read_text())["scores"]
-    rows = [(OURS, [res[e] for e in E], res["Avg"])]
+    data = json.loads((ROOT / "results" / f"{key}.json").read_text())
+    res = data["hidden_estimate"] if key == "msfr" else data["scores"]
+    ours = OURS_MSFR if key == "msfr" else OURS
+    rows = [(ours, [res[e] for e in E], res["Avg"])]
     rows += [(name, v, sum(v) / 12) for name, v in PAPER[key].items()]
     rows.sort(key=lambda r: -r[2])
-    best = {e: max(r[1][i] for r in rows[1:] if r[0] != OURS) for i, e in enumerate(E)}
+    best = {e: max(r[1][i] for r in rows if r[0] != ours) for i, e in enumerate(E)}
     lines = ["| Rank | Model | **Avg** | " + " | ".join(E) + " |", "|---:|---|---:|" + "---:|" * 12]
     for rank, (name, v, avg) in enumerate(rows, 1):
         cells = []
         for i, e in enumerate(E):
             s = f"{v[i]:.1f}"
-            cells.append(f"**{s}**" if name == OURS and v[i] > best[e] else s)
-        a = f"**{avg:.2f}**" if name == OURS else f"{avg:.2f}"
+            cells.append(f"**{s}**" if name == ours and v[i] > best[e] else s)
+        a = f"**{avg:.2f}**" if name == ours else f"{avg:.2f}"
         lines.append(f"| {rank} | {name} | {a} | " + " | ".join(cells) + " |")
     return "\n".join(lines)
 

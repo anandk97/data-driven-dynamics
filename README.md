@@ -9,7 +9,11 @@ paper's leaderboard by a wide margin: Lorenz **78.85** vs 64.54 (LSTM), Kuramoto
 **83.41** vs 18.88 (reservoir computing). The approach identifies the governing equation from the
 training data and then forecasts or denoises with it, rather than training a black-box forecaster.
 
-**Code:** [`run_lorenz.py`](run_lorenz.py) · [`run_ks.py`](run_ks.py) · [`ddd/`](ddd/) (model
+On the nuclear reactor dataset MSFR ([CTF4Nuclear](https://arxiv.org/abs/2605.15549)) the test set is
+withheld. There, an *estimated* **79.33** vs 70.97 (PyKoopman) comes from denoising plus persistence;
+no learned model beat persistence on a local proxy (details below).
+
+**Code:** [`run_lorenz.py`](run_lorenz.py) · [`run_ks.py`](run_ks.py) · [`run_msfr.py`](run_msfr.py) · [`ddd/`](ddd/) (model
 identification, solvers, denoising) · [`leaderboard.py`](leaderboard.py) (rebuilds the tables below) ·
 [`download_data.py`](download_data.py)
 
@@ -59,10 +63,47 @@ per-metric scores beat every paper model on that metric.
 | 8 | SINDy | -3.00 | 84.4 | -13.8 | -2.9 | -100.0 | -1.2 | -88.5 | -0.2 | 45.4 | -14.0 | 34.4 | 10.0 | 10.5 |
 <!-- LEADERBOARD:ks:END -->
 
+### Molten Salt Fast Reactor (`msfr`, CTF4Nuclear, 5 coupled fields on 3,880 mesh nodes)
+
+The MSFR test set is withheld, so this row is an **estimate, not a verified score**. The paper rows
+are CTF4Nuclear's Table 1.
+
+How the estimate is built:
+- **Forecasts (E1, E2, E4, E6–E12):** these predictions repeat the last (denoised) training frame,
+  which is what the paper's "last frame" baseline predicts. So these cells are that baseline's
+  published hidden-test scores.
+- **Reconstructions (E3, E5):** scored locally against `X1train`.
+  - `X2train` and `X3train` are exactly `X1train` plus white noise, so `X1train` is the clean truth.
+  - The local proxy reproduces the paper's hidden-test baseline scores on E5, E7 and E9 to 0.01, which
+    confirms this.
+
+<!-- LEADERBOARD:msfr:START -->
+| Rank | Model | **Avg** | E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9 | E10 | E11 | E12 |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | **Ours: SVHT denoise + persistence (estimated)** | **79.33** | 81.2 | 71.8 | **100.0** | 71.8 | **99.9** | 71.8 | 85.9 | 49.5 | 85.9 | 49.5 | 94.0 | 90.7 |
+| 2 | PyKoopman | 70.97 | 87.5 | 31.1 | 90.9 | 71.8 | 86.9 | 85.0 | 92.7 | 61.2 | 92.6 | 66.0 | 43.4 | 42.6 |
+| 3 | Baseline: last frame | 62.67 | 81.2 | 71.8 | 25.4 | 71.8 | -25.5 | 71.8 | 85.9 | 49.5 | 85.9 | 49.5 | 94.0 | 90.7 |
+| 4 | Reservoir | 57.22 | 92.4 | 87.4 | 98.8 | 88.4 | 98.8 | 66.0 | 92.1 | 92.8 | -100.0 | -100.0 | 86.1 | 83.8 |
+| 5 | SINDy | 55.52 | 75.3 | 42.9 | 41.4 | 42.9 | 41.5 | 42.8 | 73.8 | 52.9 | 73.8 | 52.9 | 70.1 | 55.9 |
+| 6 | Opt DMD | 53.14 | 72.1 | 41.2 | 90.7 | 41.2 | 91.3 | 41.1 | 60.9 | 50.1 | 61.9 | 52.3 | 36.6 | -1.8 |
+| 7 | ODE-LSTM | 52.71 | 80.7 | 61.4 | 5.7 | 30.1 | 93.0 | 52.5 | 78.3 | 42.3 | 34.4 | 66.8 | 56.5 | 30.7 |
+| 8 | LSTM | 50.06 | 49.3 | 30.4 | 97.0 | 14.2 | 96.4 | 12.2 | 81.4 | 49.2 | 58.0 | 23.6 | 59.1 | 30.0 |
+<!-- LEADERBOARD:msfr:END -->
+
+Local proxy results (see [`ddd/msfr.py`](ddd/msfr.py)):
+- **Proxy averages:** DMD in 30 POD modes 48.9, damped DMD 57.8. Denoise plus persistence scores
+  higher, because persistence won every short-horizon forecast.
+- **Why:** MSFR is driven by external forcing (pump velocity, heat sink) that is not in the data, so
+  there is no closed dynamics to learn from 500–2,000 frames.
+- **Damped-trend extrapolation** helped E1 (+6) but hurt E7, E11 and E12, so I did not use it.
+- **Reconstruction:** the metric uses the matrix 2-norm, which barely registers white noise, so even
+  the raw noisy input scores 99.98 and 99.88. Optimal singular-value thresholding (Gavish–Donoho)
+  keeps those scores. The paper's best is 98.85.
+
 ## Datasets
 
-I downloaded 5 CTF datasets from OSF. Only two have public test sets, so only those two can be scored
-here.
+I downloaded 6 CTF datasets from OSF. Only two have public test sets, so only those two can be scored
+exactly here. MSFR is scored through the proxy and estimate described above.
 
 | Dataset | Size | Test set | Best in the literature |
 |---|---|---|---|
@@ -71,9 +112,12 @@ here.
 | `seismo`: global seismic wavefields | 0.2 GB | withheld (Kaggle) | LSTM 13.18 ([Seismic CTF](https://arxiv.org/abs/2512.19927)) |
 | `ocean_das`: ocean fiber-optic DAS | 0.2 GB | withheld (Kaggle) | PyKoopman 12.70 ([Seismic CTF](https://arxiv.org/abs/2512.19927)) |
 | `sst`: sea surface temperature | 3.6 GB | withheld (Kaggle) | no published table |
+| `msfr`: molten salt fast reactor | 1.0 GB | withheld (Kaggle) | PyKoopman 70.97 ([CTF4Nuclear](https://arxiv.org/abs/2605.15549)) |
 
-The three withheld test sets can only be scored by submitting to the CTF Kaggle competition, which I
-did not do.
+The withheld test sets can only be scored by submitting to the CTF Kaggle competition, which I did
+not do. I did not model `seismo`, `ocean_das` or `sst`: without a test set or a comparable proxy
+there is nothing to compare against the papers. The other CTF4Nuclear systems (HPMR, MHD, DYNASTY,
+TRIGA) are not released yet.
 
 ## What I did
 
@@ -138,9 +182,10 @@ did not do.
 
 ```bash
 uv sync
-uv run python download_data.py   # ~2.3 GB into ./data (all five datasets)
+uv run python download_data.py   # ~3.3 GB download (6 datasets), ~5.6 GB extracted into ./data
 uv run python run_lorenz.py      # ~8 min, writes results/lorenz.json
-uv run python run_ks.py          # ~1 h on an RTX 4080 Laptop GPU, writes results/ks.json
+uv run python run_ks.py          # ~30 min on an RTX 4080 Laptop GPU, writes results/ks.json
+uv run python run_msfr.py        # ~10 min, CPU, writes results/msfr.json
 uv run python leaderboard.py     # rewrites the tables above
 ```
 
