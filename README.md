@@ -109,13 +109,15 @@ exactly here. MSFR is scored through the proxy and estimate described above.
 |---|---|---|---|
 | `ODE_Lorenz`: Lorenz system | 2 MB | public | LSTM 64.54 (NeurIPS paper) |
 | `PDE_KS`: Kuramoto-Sivashinsky | 0.7 GB | public | Reservoir 18.88 (NeurIPS paper) |
-| `seismo`: global seismic wavefields | 0.2 GB | withheld (Kaggle) | LSTM 13.18 ([Seismic CTF](https://arxiv.org/abs/2512.19927)) |
-| `ocean_das`: ocean fiber-optic DAS | 0.2 GB | withheld (Kaggle) | PyKoopman 12.70 ([Seismic CTF](https://arxiv.org/abs/2512.19927)) |
-| `sst`: sea surface temperature | 3.6 GB | withheld (Kaggle) | no published table |
-| `msfr`: molten salt fast reactor | 1.0 GB | withheld (Kaggle) | PyKoopman 70.97 ([CTF4Nuclear](https://arxiv.org/abs/2605.15549)) |
+| `seismo`: global seismic wavefields | 0.2 GB | withheld | LSTM 13.18 ([Seismic CTF](https://arxiv.org/abs/2512.19927)) |
+| `ocean_das`: ocean fiber-optic DAS | 0.2 GB | withheld | PyKoopman 12.70 ([Seismic CTF](https://arxiv.org/abs/2512.19927)) |
+| `sst`: sea surface temperature | 3.6 GB | withheld | no published table |
+| `msfr`: molten salt fast reactor | 1.0 GB | withheld | PyKoopman 70.97 ([CTF4Nuclear](https://arxiv.org/abs/2605.15549)) |
 
-The withheld test sets can only be scored by submitting to the CTF Kaggle competition, which I did
-not do. I did not model `seismo`, `ocean_das` or `sst`: without a test set or a comparable proxy
+The CTF papers say withheld test sets are scored by an independent referee on a Kaggle leaderboard.
+As of 22 Sep 2026, though, the [AI Institute in Dynamic Systems Kaggle page](https://www.kaggle.com/organizations/dynamics-ai)
+lists no public competitions, only datasets for Lorenz, KS and SST (training data only). So there is
+currently no public way to score these. I did not model `seismo`, `ocean_das` or `sst`: without a test set or a comparable proxy
 there is nothing to compare against the papers. The other CTF4Nuclear systems (HPMR, MHD, DYNASTY,
 TRIGA) are not released yet.
 
