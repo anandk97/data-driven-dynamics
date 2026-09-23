@@ -6,7 +6,7 @@ Trying to beat the best models from the **Common Task Framework (CTF) for scient
 
 **Result:** on both datasets with a public test set, the approach here beats every model in the
 paper's leaderboard by a wide margin: Lorenz **78.85** vs 64.54 (LSTM), Kuramoto-Sivashinsky
-**KS_AVG** vs 18.88 (reservoir computing). The approach identifies the governing equation from the
+**83.41** vs 18.88 (reservoir computing). The approach identifies the governing equation from the
 training data and then forecasts or denoises with it, rather than training a black-box forecaster.
 
 **Code:** [`run_lorenz.py`](run_lorenz.py) · [`run_ks.py`](run_ks.py) · [`ddd/`](ddd/) (model
@@ -47,6 +47,16 @@ per-metric scores beat every paper model on that metric.
 ### Kuramoto-Sivashinsky (`PDE_KS`, 1024-point chaotic PDE)
 
 <!-- LEADERBOARD:ks:START -->
+| Rank | Model | **Avg** | E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9 | E10 | E11 | E12 |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | **Ours: identified model + 4D-Var/EKF** | **83.41** | **100.0** | **100.0** | **95.1** | **64.3** | **87.2** | **61.0** | **100.0** | **83.0** | **26.2** | **84.2** | **100.0** | **100.0** |
+| 2 | Reservoir | 18.88 | 100.0 | 88.8 | 88.6 | 23.5 | 80.7 | -2.6 | -12.4 | -12.6 | -100.0 | -100.0 | 32.4 | 40.1 |
+| 3 | LSTM | 15.61 | 95.2 | -1.9 | 90.1 | -43.4 | 79.8 | -27.5 | 7.3 | 48.7 | 4.5 | 28.8 | -54.1 | -40.3 |
+| 4 | ODE-LSTM | 11.85 | 80.1 | 0.5 | 88.7 | -31.5 | 52.2 | -47.0 | 1.7 | 49.5 | 6.4 | 8.5 | -54.1 | -12.8 |
+| 5 | DeepONet | 6.99 | 36.5 | 17.4 | -1.4 | 6.5 | 6.3 | 24.5 | -9.5 | 1.5 | -1.9 | -0.1 | -4.6 | 8.8 |
+| 6 | KAN | 6.54 | -4.4 | 4.9 | 50.4 | 5.3 | 36.9 | 24.7 | -22.5 | 26.5 | -43.1 | 1.8 | 0.8 | -2.8 |
+| 7 | Baseline: zeros | 0.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| 8 | SINDy | -3.00 | 84.4 | -13.8 | -2.9 | -100.0 | -1.2 | -88.5 | -0.2 | 45.4 | -14.0 | 34.4 | 10.0 | 10.5 |
 <!-- LEADERBOARD:ks:END -->
 
 ## Datasets
