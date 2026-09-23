@@ -1,0 +1,21 @@
+[project]
+name = "data-driven-dynamics"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "ctf4science",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pyyaml>=6.0.3",
+    "scipy>=1.18.1",
+    "torch>=2.14.0",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130" }
+ctf4science = { url = "https://github.com/CTF-for-Science/ctf4science/archive/36043739892a8cd081941e9c6a57638369750722.tar.gz" }
